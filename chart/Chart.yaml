@@ -1,0 +1,11 @@
+apiVersion: v2
+
+name: #{REPOSITORY_NAME}#
+description: Helm chart for Frontend component of Diva Platform POC
+
+type: application
+
+version: #{GITVERSION_SEMVER}#
+appVersion: "0.1.0-alpha0132"
+
+icon: https://bit.ly/31kRAsa

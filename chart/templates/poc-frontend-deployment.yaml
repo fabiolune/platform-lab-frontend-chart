@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}
+  labels:
+     name: {{ .Chart.Name }}
+spec:
+  revisionHistoryLimit: 2
+  minReadySeconds: 5
+  replicas: {{ .Values.component.replicas }}
+  selector:
+    matchLabels:
+        name: {{ .Chart.Name }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        name: {{ .Chart.Name }}
+      annotations:
+        # annotations needed to allow vault secret injection
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/tls-skip-verify: "true"
+        vault.hashicorp.com/agent-pre-populate-only: "true"
+        vault.hashicorp.com/agent-init-first: "true"
+        vault.hashicorp.com/agent-inject-secret-authconfig.json: {{ .Values.component.vault.authSecret }}
+        vault.hashicorp.com/agent-inject-template-authconfig.json: |
+          {{`{{- with secret `}}"{{ .Values.component.vault.authSecret }}{{`" -}}
+          {
+            "VideoApiClientConfiguration": {
+              "BaseUrl": `}}"{{ .Values.component.apiBaseUrl }}{{`",
+              "ApiKey": "{{ .Data.apikey }}"
+            }
+          }
+          {{- end }}`}}
+        vault.hashicorp.com/role: {{ .Values.component.vault.role }}
+        
+    spec:
+      serviceAccountName: {{ .Values.component.serviceAccount }}
+      
+      containers:
+      - name: {{ .Chart.Name }}
+        image: ottregistrydev.azurecr.io/diva-platform-poc-frontend:{{ .Chart.AppVersion }}
+        command: ['sh', '-c']
+        args:
+          -
+           cp /vault/secrets/authconfig.json /app/appsettings.${ASPNETCORE_ENVIRONMENT}.json;
+           /app/Frontend
+        resources:
+          requests:
+            memory: "{{ .Values.component.resources.requests.memory }}"
+            cpu: "{{ .Values.component.resources.requests.cpu }}"
+          limits:
+            memory: "{{ .Values.component.resources.limits.memory }}"
+            cpu: "{{ .Values.component.resources.limits.cpu }}"
+        
+        ports:
+          - name: http
+            containerPort: 80
+        
+        volumeMounts:
+        - name: appsettings
+          mountPath: /app/appsettings.json
+          subPath: appsettings.json
+        
+        livenessProbe:
+          tcpSocket:
+            port: 80
+          initialDelaySeconds: 15
+          periodSeconds: 15
+          timeoutSeconds: 5
+          failureThreshold: 3
+        env:
+        - name: RELEASE_ID
+          value: "{{ .Values.component.releaseId }}"
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "run"
+      volumes:
+      - name: appsettings
+        configMap:
+           name: {{ .Chart.Name }}
+      
