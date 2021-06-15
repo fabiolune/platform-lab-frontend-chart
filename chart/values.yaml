@@ -1,0 +1,22 @@
+component:
+  releaseId: ''
+  replicas: 1
+
+  apiBaseUrl: http://poc-api
+
+  vault:
+    # required for vault policy matching, i.e. poc-persistence
+    role: 'poc-frontend'
+    
+    # secret containing the api key for authorization
+    authSecret: 'poc/network/api'
+    
+  serviceAccount: 'poc-frontend'
+  
+  resources:
+    requests:
+      memory: 160Mi
+      cpu: 50m
+    limits:
+      memory: 300Mi
+      cpu: 400m

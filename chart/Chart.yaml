@@ -1,0 +1,9 @@
+apiVersion: v2
+
+name: platform-lab-frontend
+description: Helm chart for Frontend component of Platform Lab POC
+
+type: application
+
+version: 0.1.0
+appVersion: "0.1.0-alpha0011"
