@@ -43,7 +43,7 @@ spec:
       
       containers:
       - name: {{ .Chart.Name }}
-        image: ottregistrydev.azurecr.io/diva-platform-poc-frontend:{{ .Chart.AppVersion }}
+        image: fabiolune/platform-lab-frontend:{{ .Chart.AppVersion }}
         command: ['sh', '-c']
         args:
           -
