@@ -13,6 +13,6 @@ spec:
         prefix: /
     route:
     - destination:
-        host: diva-platform-poc-frontend-chart
+        host: {{ .Chart.Name }}
         port:
           number: 80

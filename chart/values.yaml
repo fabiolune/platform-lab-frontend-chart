@@ -2,7 +2,7 @@ component:
   releaseId: ''
   replicas: 1
 
-  apiBaseUrl: http://poc-api
+  apiBaseUrl: http://platform-lab-api
 
   vault:
     # required for vault policy matching, i.e. poc-persistence
